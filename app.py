@@ -123,22 +123,6 @@ def getBooksGreaterThanZero():
     return jsonify(output)
 
 
-#get method for all transactions
-@app.route("/transactions",methods=['GET'])
-def getTransactions():
-    allTransactions=transaction.query_all()
-    output=[]
-    for transactions in allTransactions:
-        currTransactions={}
-        # currTransactions['transaction_id']=transactions.transaction_id
-        currTransactions['book_id']=transactions.book_id
-        currTransactions['stu_id']=transactions.stu_id
-        currTransactions['date_of_issue']=transactions.date_of_issue
-        currTransactions['due_date']=transactions.due_date
-
-
-
-
 if __name__=="__main__":
     app.run(debug=True)
 
