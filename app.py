@@ -29,7 +29,7 @@ class book(db.Model):
     bookCount=db.Column(db.Integer,nullable=False)
     transaction = db.relationship('transaction', backref='book', lazy=True)
 
-    def __init__(self,bookTitle,bookAuthor,bookCount):
+    def __init__(self,bookId,bookTitle,bookAuthor,bookCount):
         self.bookId=bookId
         self.bookTitle=bookTitle
         self.bookAuthor=bookAuthor
@@ -44,7 +44,7 @@ class student(db.Model):
     sContactNo=db.Column(db.String(20),nullable=False,unique=True)
     ransaction = db.relationship('transaction', backref='student', lazy=True)
 
-    def __init__(self,sName,sEmailId,sContactNo):
+    def __init__(self,sId,sName,sEmailId,sContactNo):
         self.sId=sId
         self.sName=sName
         self.sEmailId=sEmailId
@@ -59,7 +59,7 @@ class transaction(db.Model):
     trans_id=db.Column(db.Integer,primary_key=True)
     book_id=db.Column(db.Integer,db.ForeignKey(book.bookId),primary_key=True)
     stud_id=db.Column(db.Integer,db.ForeignKey(student.sId),primary_key=True)
-    Action=db.Column(db.String(40),nullable=True)
+    Action=db.Column(db.String,nullable=True)
     date_of_issue=db.Column(db.DateTime,default=datetime.utcnow,nullable=False)
     due_date=db.Column(db.DateTime,nullable=False)
 
