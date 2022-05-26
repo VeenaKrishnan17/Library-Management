@@ -77,6 +77,8 @@ def test():
     return {'test' : 'test'}
 
 
+
+
 #Get method for books
 @app.route("/books",methods=['GET'])
 def getBooks():
@@ -89,8 +91,8 @@ def getBooks():
         currBook['bookAuthor']=books.bookAuthor
         currBook['bookCount']=books.bookCount
         output.append(currBook)
-
     return jsonify(output)
+ 
 
 
 #post method for books
@@ -156,7 +158,6 @@ def getTrans():
         currTrans['date_of_issue']=transactions.date_of_issue
         currTrans['due_date']=transactions.due_date
         output.append(currTrans)
-
     return jsonify(output)
 
 
