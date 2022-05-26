@@ -30,7 +30,7 @@ class book(db.Model):
     transaction = db.relationship('transaction', backref='book', lazy=True)
 
     def __init__(self,bookTitle,bookAuthor,bookCount):
-        # self.bookId=bookId
+        self.bookId=bookId
         self.bookTitle=bookTitle
         self.bookAuthor=bookAuthor
         self.bookCount=bookCount
@@ -45,7 +45,7 @@ class student(db.Model):
     ransaction = db.relationship('transaction', backref='student', lazy=True)
 
     def __init__(self,sName,sEmailId,sContactNo):
-        # self.sId=sId
+        self.sId=sId
         self.sName=sName
         self.sEmailId=sEmailId
         self.sContactNo=sContactNo
