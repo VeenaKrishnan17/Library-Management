@@ -7,6 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/library'
+app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db = SQLAlchemy(app)
 
@@ -59,6 +60,8 @@ def test():
     return {'test' : 'test'}
 
 
+
+
 #Get method for books
 @app.route("/books",methods=['GET'])
 def getBooks():
@@ -72,6 +75,7 @@ def getBooks():
         currBook['bookCount']=books.bookCount
         output.append(currBook)
     return jsonify(output)
+ 
 
 
 #post method for books
