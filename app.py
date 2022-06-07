@@ -10,7 +10,7 @@ from sqlalchemy import func
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:test123@localhost/library' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/library' 
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db = SQLAlchemy(app)
@@ -56,16 +56,17 @@ class transaction(db.Model):
     trans_id=db.Column(db.Integer,primary_key=True)
     book_id=db.Column(db.Integer,db.ForeignKey(book.bookId),primary_key=True)
     stud_id=db.Column(db.Integer,db.ForeignKey(student.sId),primary_key=True)
-    Action=db.Column(db.String,nullable=True)
-    date_of_issue=db.Column(db.Date(),default=datetime.today(),nullable=False)
-    due_date=db.Column(db.Date,nullable=False)
+    Action=db.Column(db.String(40),nullable=True)
+    date_of_issue=db.Column(db.Date,default=datetime.today(),nullable=False)
+    due_date=db.Column(db.DateTime,nullable=False)
 
-    def __init__(self,book_id,stu_id,Action,due_date):
-        # self.trans_id=trans_id
+    def __init__(self,book_id,stud_id,Action,due_date):
+        
         self.book_id=book_id
-        self.stu_id=stu_id
+        self.stud_id=stud_id
         self.Action=Action
         self.due_date=due_date
+
 
 #for testing purposr
 @app.route("/test",methods=['GET'])
@@ -93,7 +94,7 @@ def getBooks():
 def getBook():
     gbook=book.query.get(id)
     return jsonify(gbook)
-    
+
 
 #post method for books
 @app.route("/books",methods=['POST'])
@@ -153,13 +154,14 @@ def getTrans():
         currTrans = {}
         currTrans['trans_id']=transactions.trans_id
         currTrans['book_id']=transactions.book_id
-        currTrans['stu_id']=transactions.stu_id
+        currTrans['stud_id']=transactions.stud_id
         currTrans['Action']=transactions.Action
         currTrans['date_of_issue']=transactions.date_of_issue
         currTrans['due_date']=transactions.due_date
         output.append(currTrans)
 
     return jsonify(output)
+
 
 
 #post method for trans
@@ -170,6 +172,7 @@ def postTrans():
     db.session.add(transactions)
     db.session.commit()
     return jsonify(TransData)
+
 
 
 #get the details of most read books
