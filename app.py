@@ -10,7 +10,7 @@ from sqlalchemy import func
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/library' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:test123@localhost/library' 
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db = SQLAlchemy(app)
@@ -41,8 +41,8 @@ class student(db.Model):
     sContactNo=db.Column(db.String(20),nullable=False,unique=True)
     ransaction = db.relationship('transaction', backref='student', lazy=True)
 
-    def __init__(self,sId,sName,sEmailId,sContactNo):
-        self.sId=sId
+    def __init__(self,sName,sEmailId,sContactNo):
+        # self.sId=sId
         self.sName=sName
         self.sEmailId=sEmailId
         self.sContactNo=sContactNo
@@ -60,10 +60,10 @@ class transaction(db.Model):
     date_of_issue=db.Column(db.Date(),default=datetime.today(),nullable=False)
     due_date=db.Column(db.Date,nullable=False)
 
-    def __init__(self,book_id,stud_id,Action,due_date):
+    def __init__(self,book_id,stu_id,Action,due_date):
         # self.trans_id=trans_id
         self.book_id=book_id
-        self.stud_id=stud_id
+        self.stu_id=stu_id
         self.Action=Action
         self.due_date=due_date
 
@@ -71,8 +71,6 @@ class transaction(db.Model):
 @app.route("/test",methods=['GET'])
 def test():
     return {'test' : 'test'}
-
-
 
 
 #Get method for books
@@ -87,9 +85,15 @@ def getBooks():
         currBook['bookAuthor']=books.bookAuthor
         currBook['bookCount']=books.bookCount
         output.append(currBook)
-    return jsonify(output)
- 
 
+    return jsonify(output)
+
+#get single book
+@app.route("/books/<bookId>",methods=['GET'])
+def getBook():
+    gbook=book.query.get(id)
+    return jsonify(gbook)
+    
 
 #post method for books
 @app.route("/books",methods=['POST'])
@@ -149,11 +153,12 @@ def getTrans():
         currTrans = {}
         currTrans['trans_id']=transactions.trans_id
         currTrans['book_id']=transactions.book_id
-        currTrans['stud_id']=transactions.stud_id
+        currTrans['stu_id']=transactions.stu_id
         currTrans['Action']=transactions.Action
         currTrans['date_of_issue']=transactions.date_of_issue
         currTrans['due_date']=transactions.due_date
         output.append(currTrans)
+
     return jsonify(output)
 
 
@@ -165,6 +170,7 @@ def postTrans():
     db.session.add(transactions)
     db.session.commit()
     return jsonify(TransData)
+
 
 #get the details of most read books
 @app.route("/mostReadBooks",methods=['GET'])
@@ -178,7 +184,6 @@ def mostReadBooks():
         currBook['count']=books.count
         output.append(currBook)
     return jsonify(output)
-
 
 
 
