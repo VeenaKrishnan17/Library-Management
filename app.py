@@ -4,22 +4,13 @@ from flask import Flask, jsonify,request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import select
+from sqlalchemy import func
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/library' 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:test123@localhost/library' 
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db = SQLAlchemy(app)
-
-
-
-# transac = db.Table('bk_allocation',
-#     db.Column('book_id',db.Integer,db.ForeignKey('book.bookId')),
-#     db.Column('stu_id',db.Integer,db.ForeignKey('student.sId')),
-#     db.Column('date_of_issue',db.DateTime,default=datetime.utcnow,nullable=False),
-#     db.Column('due_date',db.DateTime,nullable=False)
-# )
-
 
 #book table
 class book(db.Model):
@@ -29,8 +20,8 @@ class book(db.Model):
     bookCount=db.Column(db.Integer,nullable=False)
     transaction = db.relationship('transaction', backref='book', lazy=True)
 
-    def __init__(self,bookId,bookTitle,bookAuthor,bookCount):
-        self.bookId=bookId
+    def __init__(self,bookTitle,bookAuthor,bookCount):
+        # self.bookId=bookId
         self.bookTitle=bookTitle
         self.bookAuthor=bookAuthor
         self.bookCount=bookCount
@@ -44,8 +35,8 @@ class student(db.Model):
     sContactNo=db.Column(db.String(20),nullable=False,unique=True)
     ransaction = db.relationship('transaction', backref='student', lazy=True)
 
-    def __init__(self,sId,sName,sEmailId,sContactNo):
-        self.sId=sId
+    def __init__(self,sName,sEmailId,sContactNo):
+        # self.sId=sId
         self.sName=sName
         self.sEmailId=sEmailId
         self.sContactNo=sContactNo
@@ -58,15 +49,15 @@ class student(db.Model):
 class transaction(db.Model):
     trans_id=db.Column(db.Integer,primary_key=True)
     book_id=db.Column(db.Integer,db.ForeignKey(book.bookId),primary_key=True)
-    stud_id=db.Column(db.Integer,db.ForeignKey(student.sId),primary_key=True)
-    Action=db.Column(db.String,nullable=True)
-    date_of_issue=db.Column(db.DateTime,default=datetime.utcnow,nullable=False)
+    stu_id=db.Column(db.Integer,db.ForeignKey(student.sId),primary_key=True)
+    Action=db.Column(db.String(40),nullable=True)
+    date_of_issue=db.Column(db.Date,default=datetime.utcnow,nullable=False)
     due_date=db.Column(db.DateTime,nullable=False)
 
-    def __init__(self,trans_id,book_id,stud_id,Action,due_date):
-        self.trans_id=trans_id
+    def __init__(self,book_id,stu_id,Action,due_date):
+        
         self.book_id=book_id
-        self.stud_id=stud_id
+        self.stu_id=stu_id
         self.Action=Action
         self.due_date=due_date
 
@@ -74,8 +65,6 @@ class transaction(db.Model):
 @app.route("/test",methods=['GET'])
 def test():
     return {'test' : 'test'}
-
-
 
 
 #Get method for books
@@ -90,9 +79,14 @@ def getBooks():
         currBook['bookAuthor']=books.bookAuthor
         currBook['bookCount']=books.bookCount
         output.append(currBook)
-    return jsonify(output)
- 
 
+    return jsonify(output)
+
+#get single book
+@app.route("/books/<bookId>",methods=['GET'])
+def getBook():
+    gbook=book.query.get(id)
+    return jsonify(gbook)
 
 #post method for books
 @app.route("/books",methods=['POST'])
@@ -152,11 +146,12 @@ def getTrans():
         currTrans = {}
         currTrans['trans_id']=transactions.trans_id
         currTrans['book_id']=transactions.book_id
-        currTrans['stud_id']=transactions.stud_id
+        currTrans['stu_id']=transactions.stu_id
         currTrans['Action']=transactions.Action
         currTrans['date_of_issue']=transactions.date_of_issue
         currTrans['due_date']=transactions.due_date
         output.append(currTrans)
+
     return jsonify(output)
 
 
@@ -164,11 +159,26 @@ def getTrans():
 @app.route("/trans",methods=['POST'])
 def postTrans():
     TransData=request.get_json()
-    transactions = transaction(trans_id=TransData['trans_id'], book_id=TransData['book_id'], stud_id=TransData['stud_id'], Action=TransData['Action'],due_date=TransData['due_date'])
+    transactions = transaction(book_id=TransData['book_id'], stu_id=TransData['stu_id'], Action=TransData['Action'],due_date=TransData['due_date'])
     db.session.add(transactions)
     db.session.commit()
     return jsonify(TransData)
 
+
+
+#get the details of most read books
+@app.route("/mostReadBooks",methods=['GET'])
+def mostReadBooks():
+    mostReadBooks= db.session.execute('select book_id,date_of_issue, COUNT (*)from transaction GROUP BY book_id,date_of_issue ORDER BY count DESC ;')
+   
+    output=[]
+    for books in mostReadBooks:
+        currBook = {}
+        currBook['book_id']=books.book_id
+        currBook['date_of_issue']=books.date_of_issue
+        currBook['count']=books.count
+        output.append(currBook)
+    return jsonify(output)
 
 
 if __name__=="__main__":
